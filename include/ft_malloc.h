@@ -18,6 +18,7 @@ typedef struct s_block
 	struct	s_block	*prev; // 8 bytes
 	int 		free; // 4 bytes
 }	t_block; // 28 bytes
+// Son 28 bytes pero lo tengo que redondear a 32 bytes por el padding
 
 typedef struct s_heap
 {
@@ -32,7 +33,13 @@ void	free(void *ptr);
 void	*malloc(size_t size);
 void	*realloc(void *ptr, size_t size);
 
+// Utils
 void	split_block(t_block *block, size_t size);
+void	*request_memory(size_t size);
+void	*malloc_large(size_t size);
+size_t	calc_zone_size(size_t max_block_size);
+t_block *init_zone(size_t zone_size);
 t_block	*find_free_block(t_block **list, size_t size);
+t_block *extend_zone(t_block *last, size_t zone_type_size);
 
 #endif
