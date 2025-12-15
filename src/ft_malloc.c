@@ -2,23 +2,7 @@
 
 t_heap g_heap = {NULL, NULL, NULL};
 
-t_block *extend_zone(t_block *last, size_t zone_type_size)
-{
-	size_t	zone_size;
-	t_block	*new_zone;
-
-	zone_size = calc_zone_size(zone_type_size);
-	new_zone = init_zone(zone_size);
-	if (!new_zone)
-		return (NULL);
-	if (last)
-		last->next = new_zone;
-
-	new_zone->prev = last;
-	return (new_zone);
-}
-
-t_block *init_zone(size_t zone_size)
+static	t_block *init_zone(size_t zone_size)
 {
 	void 	*zone_ptr;
 	t_block *first_block;
@@ -37,7 +21,7 @@ t_block *init_zone(size_t zone_size)
 	return (first_block);
 }
 
-size_t	calc_zone_size(size_t max_block_size)
+static	size_t	calc_zone_size(size_t max_block_size)
 {
 	size_t page_size;
 	size_t min_size_needed;
@@ -54,11 +38,28 @@ size_t	calc_zone_size(size_t max_block_size)
 	return (zones_size);
 }
 
+static	t_block *extend_zone(t_block *last, size_t zone_type_size)
+{
+	size_t	zone_size;
+	t_block	*new_zone;
+
+	zone_size = calc_zone_size(zone_type_size);
+	new_zone = init_zone(zone_size);
+	if (!new_zone)
+		return (NULL);
+	if (last)
+		last->next = new_zone;
+
+	new_zone->prev = last;
+	return (new_zone);
+}
+
 void	*malloc(size_t size)
 {
 	size_t	aligned_size;
 	t_block *zone;
 	
+	write(1, "[Mi Malloc] Pidiendo memoria...\n", 32);
 	if (size <= 0)
 		return (NULL);
 
