@@ -2,17 +2,23 @@
 
 t_heap g_heap = {NULL, NULL, NULL};
 
-static	void	*request_memory(size_t size)
+t_block *extend_zone(t_block *last, size_t zone_type_size)
 {
-	void *ptr;
+	size_t	zone_size;
+	t_block	*new_zone;
 
-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-	if (ptr == MAP_FAILED)
+	zone_size = calc_zone_size(zone_type_size);
+	new_zone = init_zone(zone_size);
+	if (!new_zone)
 		return (NULL);
-	return (ptr);
+	if (last)
+		last->next = new_zone;
+
+	new_zone->prev = last;
+	return (new_zone);
 }
 
-static	t_block *init_zone(size_t zone_size)
+t_block *init_zone(size_t zone_size)
 {
 	void 	*zone_ptr;
 	t_block *first_block;
@@ -31,13 +37,13 @@ static	t_block *init_zone(size_t zone_size)
 	return (first_block);
 }
 
-static	size_t	calc_zone_size(size_t max_block_size)
+size_t	calc_zone_size(size_t max_block_size)
 {
 	size_t page_size;
 	size_t min_size_needed;
 	size_t zones_size;
 
-	page_size = getpagesize(); // Normaly 4096
+	page_size = getpagesize(); // Normaly 4096 bytes
 
 	// We calculate how much space 100 blocks occupy (Data + Header)
 	min_size_needed = (max_block_size + BLOCK_META_SIZE) * 100;
@@ -56,13 +62,11 @@ void	*malloc(size_t size)
 	if (size <= 0)
 		return (NULL);
 
-	// El size que me piden lo tengo que alinear a un multiplo de 8,
-	// para tener la ram organizada, por lo que tengo que meter padding
-	// si te piden 10 bytes y mi struct mide 28 bytes, tengo que pedir 38 pero como 
-	// tiene que ser multiplo de 8 tengo que pedir 40 bytes para que los ultimos tres digitos sean 0
+	// El size que me piden lo tengo que alinear a un multiplo de 16,
+	// para mantener la alineacion de memoria (system alignment) de 64 bits y evitar
+	// fallos en CPU. Si me piden 10 lo redondeo a 16.
 	aligned_size = ALIGN(size);
 
-	// Compruebo el tamano que quieren reservar y chequeo si es tiny o small
 	// Si es tiny o small, compruebo si ya he pre asignado un espacio para no tener que pedir todo el rato espacio al kernel
 	// ahora de la zona pre asigned que es grande tengo que cojer solo el tamano que me han pedido,
 	// la zona suele medir 16KB, si el user solo me pide 10 bytes tengo que splitearlo.
@@ -99,6 +103,15 @@ void	*malloc(size_t size)
 				return (NULL);
 		}
 		zone = find_free_block(&g_heap.small_zone, aligned_size);
+		if (!zone)
+		{
+			t_block *cursor = g_heap.small_zone;
+			while (cursor && cursor->next)
+				cursor = cursor->next;
+			zone = extend_zone(cursor, SMALL_MAX_SIZE);
+			if (!zone)
+				return (NULL);
+		}
 	}
 	else
 		return (malloc_large(aligned_size));
