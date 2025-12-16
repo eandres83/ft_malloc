@@ -4,6 +4,8 @@
 #define TINY_MAX_SIZE 128
 #define SMALL_MAX_SIZE 1024
 
+// ALIGN(x): Aligns x to the next multiple of 16 bytes (128 bits)
+// BLOCK_META_SIZE: Size of t_block struct aligned to 16 bytes
 #define ALIGN(x) (((x) + 15) & ~15)
 #define BLOCK_META_SIZE ALIGN(sizeof(t_block))
 
@@ -11,6 +13,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
+// Describes a memory block (header). The payload follows immediately after.
 typedef struct s_block
 {
 	size_t		size; // 8 bytes
@@ -18,8 +21,9 @@ typedef struct s_block
 	struct	s_block	*prev; // 8 bytes
 	int 		free; // 4 bytes
 }	t_block; // 28 bytes
-// Son 28 bytes pero lo tengo que redondear a 32 bytes por el padding
+// Total aligned to 32 with padding
 
+// Holds pointers to the start of each zone type.
 typedef struct s_heap
 {
 	t_block	*tiny_zone;
@@ -29,6 +33,7 @@ typedef struct s_heap
 
 extern t_heap g_heap;
 
+// Core Functions
 void	free(void *ptr);
 void	*malloc(size_t size);
 void	*realloc(void *ptr, size_t size);

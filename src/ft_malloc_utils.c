@@ -1,6 +1,7 @@
 #include "../include/ft_malloc.h"
 
-// Busca el primer bloque que encuentra que este libre y me entre el payload alineado
+// Iterates through the list to find the firts free block that fits the size
+// Return NULL if no suitable block is found
 t_block	*find_free_block(t_block **list, size_t size)
 {
 	t_block	*current;
@@ -17,39 +18,39 @@ t_block	*find_free_block(t_block **list, size_t size)
 	return (NULL);
 }
 
-// Splitea el bloque para el temano que me piden
-// t_block *block es el puntero al inicio del bloque donde tengo que
-// meter el size
-// tengo que meter el nuevo bloque entre el Bloque A y Bloque B
+// Splits a block into two:
+// 1. The requested block (occupied)
+// 2. A new remainder block (free)
+// Only splits if there is enought space for a new header + minimal payload
 // [ Bloque A ] <-----(prev/next)-----> [ Bloque B ]
 void split_block(t_block *block, size_t size)
 {
 	t_block *new_block;
 
-	// Comprobar si entra el size en el bloque
-	// Puede ser que despues de muchos usos el bloque no tenga el espacio suficiente
+	// Ensure thre's enough space for a new block header + alignment padding
 	if (block->size < size + BLOCK_META_SIZE + ALIGN(1))
 		return ;
 
-	// Casteo el t_block a char * para que lo gestione como bytes y le sumo los metadatos y el size
-	// Esto se hace para que el new_block este por delante del que yo quiero crear
-	// si el bloque mide 1000 y yo quiero 10, el new_block son los 958, y el block anterior lo convierto en el tamano que me piden
+	// Calculate address of the new block
 	new_block = (t_block *)((char *)block + BLOCK_META_SIZE + size);
 
-	// Calculo los valores del new_block
+	// Setup new block metadata
 	new_block->size = block->size - size - BLOCK_META_SIZE;
 	new_block->next = block->next;
 	new_block->prev = block;
 	new_block->free = 1;
 
+	// Update current block
 	block->size = size;
 	block->next = new_block;
 
-	// Si no estamos al final de la lista tenemos que actualizarlo
+	// Update the backward link of the next block
 	if (new_block->next)
 		new_block->next->prev = new_block;
 }
 
+// Handles LARGE allocations (> 1024 bytes)
+// Allocates directly via mmap and links to g_heap.large_zone
 void	*malloc_large(size_t size)
 {
 	t_block *new_block;
@@ -60,15 +61,15 @@ void	*malloc_large(size_t size)
 
 	total_size = size + BLOCK_META_SIZE;
 
-	// Redondear al siguiente multiplo de pagina
+	// Round up to multiple of page size
 	// ((total + 4095) / 4096) * 4096
 	total_size = ((total_size + page_size -1) / page_size) * page_size;
 
-	// Pedir memoria al sistema
 	new_block = (t_block *)request_memory(total_size);
 
-	new_block->size = total_size - size - BLOCK_META_SIZE;
-	new_block->free = 0; // Ocupado
+	// Configure header
+	new_block->size = total_size - size - BLOCK_META_SIZE; // Store payload capacity
+	new_block->free = 0;
 	new_block->next = g_heap.large_zone; // Insertamos al principio
 	new_block->prev = NULL;
 
@@ -84,6 +85,7 @@ void	*malloc_large(size_t size)
 	return ((void *)((char *)new_block + BLOCK_META_SIZE));
 }
 
+// Wrapper for mmap to request raw memory from the OS.
 void	*request_memory(size_t size)
 {
 	void *ptr;
