@@ -26,17 +26,14 @@ static	t_block *init_zone(size_t zone_size)
 // Returns a multiple of getpagesize().
 static	size_t	calc_zone_size(size_t max_block_size)
 {
-	size_t page_size;
 	size_t min_size_needed;
 	size_t zones_size;
-
-	page_size = getpagesize(); // Normaly 4096 bytes
 
 	// We calculate how much space 100 blocks occupy (Data + Header)
 	min_size_needed = (max_block_size + BLOCK_META_SIZE) * 100;
 
 	// We round up to the next multiple of page_size
-	zones_size = ((min_size_needed + page_size - 1) / page_size) * page_size;
+	zones_size = ((min_size_needed + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
 
 	return (zones_size);
 }

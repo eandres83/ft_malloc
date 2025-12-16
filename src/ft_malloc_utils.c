@@ -54,16 +54,13 @@ void split_block(t_block *block, size_t size)
 void	*malloc_large(size_t size)
 {
 	t_block *new_block;
-	size_t	page_size;
 	size_t	total_size;
-
-	page_size = getpagesize();
 
 	total_size = size + BLOCK_META_SIZE;
 
 	// Round up to multiple of page size
 	// ((total + 4095) / 4096) * 4096
-	total_size = ((total_size + page_size -1) / page_size) * page_size;
+	total_size = ((total_size + PAGE_SIZE -1) / PAGE_SIZE) * PAGE_SIZE;
 
 	new_block = (t_block *)request_memory(total_size);
 
