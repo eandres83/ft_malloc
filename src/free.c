@@ -41,6 +41,7 @@ void	free(void *ptr)
 {
 	t_block *block;
 
+	write(1, "Mi free aqui", 12);
 	if (ptr == NULL)
 		return ;
 
@@ -52,5 +53,5 @@ void	free(void *ptr)
 		coalising(block);
 	}
 	else
-		free_large(block, &g_heap.large_zone);
+		free_large(block);
 }

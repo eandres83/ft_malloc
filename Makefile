@@ -11,6 +11,7 @@ INC_DIR = include
 
 SRCS = src/ft_malloc.c \
 	src/ft_malloc_utils.c \
+	src/free.c \
 
 OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
