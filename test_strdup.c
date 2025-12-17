@@ -5,19 +5,25 @@
 
 int main(void)
 {
-	char *original = "Hola, malloc!";
-	char *copia;
+	char *str;
 
-	copia = strdup(original); 
-	if (!copia)
-	{
-		printf("Error: strdup falló (malloc devolvió NULL)\n");
+	str = malloc(15);
+	strcpy(str, "Hola");
+	printf("String inicial: %s (Direccion: %p)\n", str, str);
+
+	str = realloc(str, 20);
+
+	if (!str)
 		return (1);
-	}
-	write(1, copia, 13);
-	write(1, "\n", 1);
 
-	free(copia);
+	strcat(str, " Mundo!");
+	printf("String ampliado: %s (Direccion: %p)\n", str, str);
+
+	str = realloc(str, 20);
+	printf("String reducido: %s (Direccion: %p)\n", str, str);
+
+	free(str);
+
 	return (0);
 }
 

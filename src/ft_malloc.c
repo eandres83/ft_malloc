@@ -91,7 +91,6 @@ void	*malloc(size_t size)
 	size_t	aligned_size;
 	t_block *block;
 	
-	write(1, "Mi malloc este\n", 15);
 	if (size <= 0)
 		return (NULL);
 
