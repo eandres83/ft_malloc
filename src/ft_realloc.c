@@ -42,7 +42,7 @@ void	*realloc(void *ptr, size_t size)
 
 	// If the current block is large enough, we don't need to move data.
 	// We try to split the block to return unused memory to the system.
-	if (block->size >= ALIGN(size))
+	if (block->size >= ALIGN(size) && block->size <= SMALL_MAX_SIZE)
 	{
 		split_block(block, ALIGN(size));
 		return (ptr);

@@ -1,6 +1,15 @@
 #include "../include/ft_malloc.h"
 
-t_heap g_heap = {NULL, NULL, NULL};
+t_heap g_heap = {0};
+
+static	void	init_debug_setting(void)
+{
+	if (g_heap.initialized)
+		return;
+	if (getenv("MALLOC_POISON"))
+		g_heap.debug_mode = 1;
+	g_heap.initialized = 1;
+}
 
 // Creates a single large free block covering the entire zone.
 static	t_block *init_zone(size_t zone_size)
@@ -88,11 +97,15 @@ static	t_block *handle_zone_allocation(t_block **head, size_t size, size_t max_s
 // 4. Return pointer to the payload
 void	*malloc(size_t size)
 {
+	void	*ptr;
 	size_t	aligned_size;
 	t_block *block;
 	
 	if (size <= 0)
 		return (NULL);
+
+	if (!g_heap.initialized)
+		init_debug_setting();
 
 	// El size que me piden lo tengo que alinear a un multiplo de 16,
 	// para mantener la alineacion de memoria (system alignment) de 64 bits y evitar
@@ -117,7 +130,16 @@ void	*malloc(size_t size)
 
 	split_block(block, aligned_size);
 	block->free = 0;
+	ptr = (void *)((char *)block + BLOCK_META_SIZE);
 
-	return ((void *)((char *)block + BLOCK_META_SIZE));
+	g_heap.malloc_calls++;
+	g_heap.total_allocated += size;
+
+	if (g_heap.debug_mode)
+	{
+		ft_memset(ptr, 0xAA, size);
+	}
+
+	return (ptr);
 }
 

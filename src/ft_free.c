@@ -65,6 +65,11 @@ void	free(void *ptr)
 	// Pointer arithmetic to find the Metadata Header
 	block = (t_block *)((char *)ptr - BLOCK_META_SIZE);
 
+	g_heap.free_calls++;
+
+	if (g_heap.debug_mode)
+		ft_memset(ptr, 0xBB, block->size);
+
 	// Dispatcher
 	if (block->size <= SMALL_MAX_SIZE)
 	{

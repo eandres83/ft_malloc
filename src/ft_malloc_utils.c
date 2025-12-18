@@ -65,7 +65,7 @@ void	*malloc_large(size_t size)
 	new_block = (t_block *)request_memory(total_size);
 
 	// Configure header
-	new_block->size = total_size - size - BLOCK_META_SIZE; // Store payload capacity
+	new_block->size = total_size - BLOCK_META_SIZE; // Store payload capacity
 	new_block->free = 0;
 	new_block->next = g_heap.large_zone; // Insertamos al principio
 	new_block->prev = NULL;
@@ -91,5 +91,19 @@ void	*request_memory(size_t size)
 	if (ptr == MAP_FAILED)
 		return (NULL);
 	return (ptr);
+}
+
+void	*ft_memset(void *dest, int c, size_t count)
+{
+	char	*temp_dest;
+
+	temp_dest = (char *)dest;
+	while (count > 0)
+	{
+		*temp_dest = c;
+		temp_dest ++;
+		count--;
+	}
+	return (dest);
 }
 
