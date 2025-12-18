@@ -13,6 +13,7 @@ SRCS = src/ft_malloc.c \
 	src/ft_malloc_utils.c \
 	src/ft_free.c \
 	src/ft_realloc.c \
+	src/show_alloc_mem.c \
 
 OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 

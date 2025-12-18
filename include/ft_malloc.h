@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 
 // Describes a memory block (header). The payload follows immediately after.
@@ -30,6 +31,13 @@ typedef struct s_heap
 	t_block	*tiny_zone;
 	t_block	*small_zone;
 	t_block *large_zone;
+
+	size_t	malloc_calls;
+	size_t	free_calls;
+	size_t	total_allocated;
+
+	int	debug_mode;
+	int	initialized;
 }	t_heap;
 
 extern t_heap g_heap;
@@ -38,11 +46,14 @@ extern t_heap g_heap;
 void	free(void *ptr);
 void	*malloc(size_t size);
 void	*realloc(void *ptr, size_t size);
+void	show_alloc_mem(void);
+void	show_alloc_mem_ex(void);
 
 // Utils
 void	split_block(t_block *block, size_t size);
 void	*request_memory(size_t size);
 void	*malloc_large(size_t size);
+void	*ft_memset(void *dest, int c, size_t count);
 t_block	*find_free_block(t_block **list, size_t size);
 
 #endif
