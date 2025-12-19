@@ -18,7 +18,7 @@ SRCS = src/ft_malloc.c \
 OBJS = $(patsubst src/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra -fPIC
+CFLAGS = -g -Wall -Werror -Wextra -fPIC
 
 INCLUDES = -I $(INC_DIR)
 
