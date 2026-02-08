@@ -113,7 +113,7 @@ void	*malloc(size_t size)
 	aligned_size = ALIGN(size);
 	block = NULL;
 
-	// Si es tiny o small, compruebo si ya he pre asignado un espacio para no tener que pedir todo el rato espacio al kernel
+	// Si es tiny o small, compruebo si ya he pre asignado un espacio para no tener que pedir todo el rato espacio
 	// ahora de la zona pre asigned que es grande tengo que cojer solo el tamano que me han pedido,
 	// la zona suele medir 16KB, si el user solo me pide 10 bytes tengo que splitearlo.
 	if (aligned_size <= TINY_MAX_SIZE)
